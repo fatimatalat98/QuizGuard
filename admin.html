@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Admin Dashboard</title>
+
+    <link
+        rel="stylesheet"
+        href="style.css"
+    >
+
+    <style>
+
+        .admin-container {
+            width: 95%;
+            max-width: 1100px;
+            margin: 40px auto;
+        }
+
+        .admin-header {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .table-container {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 14px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        th {
+            background: #f8fafc;
+        }
+
+        .passed {
+            color: #16a34a;
+            font-weight: bold;
+        }
+
+        .failed {
+            color: #dc2626;
+            font-weight: bold;
+        }
+
+        .cheating {
+            color: #dc2626;
+            font-weight: bold;
+        }
+
+        .clear-btn {
+            border: none;
+            background: #dc2626;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 7px;
+            cursor: pointer;
+        }
+
+        .clear-btn:hover {
+            background: #b91c1c;
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+    <div class="admin-container">
+
+        <div class="admin-header">
+
+            <div>
+
+                <h1>Admin Dashboard</h1>
+
+                <p>
+                    Quiz Results
+                </p>
+
+            </div>
+
+            <button
+                class="clear-btn"
+                id="clearResults"
+            >
+                Clear Results
+            </button>
+
+        </div>
+
+
+        <div class="table-container">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            Student
+                        </th>
+
+                        <th>
+                            Score
+                        </th>
+
+                        <th>
+                            Status
+                        </th>
+
+                        <th>
+                            Violations
+                        </th>
+
+                        <th>
+                            Submission
+                        </th>
+
+                        <th>
+                            Time
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody id="resultsTable">
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+
+    <script>
+
+        const resultsTable =
+            document.getElementById(
+                "resultsTable"
+            );
+
+
+        function loadResults() {
+
+            const results =
+                JSON.parse(
+                    localStorage.getItem(
+                        "quizResults"
+                    )
+                ) || [];
+
+
+            resultsTable.innerHTML = "";
+
+
+            if (results.length === 0) {
+
+                resultsTable.innerHTML = `
+
+                    <tr>
+
+                        <td
+                            colspan="6"
+                            style="text-align:center"
+                        >
+                            No results yet.
+                        </td>
+
+                    </tr>
+
+                `;
+
+                return;
+
+            }
+
+
+            results.forEach(
+                function(result) {
+
+                    const row =
+                        document.createElement(
+                            "tr"
+                        );
+
+
+                    let status = "";
+
+                    let statusClass = "";
+
+
+                    if (
+                        result.reason
+                        === "cheating"
+                    ) {
+
+                        status =
+                            "Quiz Terminated";
+
+                        statusClass =
+                            "cheating";
+
+                    } else if (
+                        result.reason
+                        === "time"
+                    ) {
+
+                        status =
+                            "Time Expired";
+
+                        statusClass =
+                            "failed";
+
+                    } else {
+
+                        status =
+                            "Submitted";
+
+                        statusClass =
+                            "passed";
+
+                    }
+
+
+                    row.innerHTML = `
+
+                        <td>
+                            ${result.studentName}
+                        </td>
+
+                        <td>
+                            ${result.score}
+                            /
+                            ${result.total}
+                        </td>
+
+                        <td
+                            class="${statusClass}"
+                        >
+                            ${status}
+                        </td>
+
+                        <td>
+                            ${result.violations}
+                        </td>
+
+                        <td>
+                            ${result.reason}
+                        </td>
+
+                        <td>
+                            ${result.submittedAt}
+                        </td>
+
+                    `;
+
+
+                    resultsTable.appendChild(
+                        row
+                    );
+
+                }
+            );
+
+        }
+
+
+        document
+            .getElementById("clearResults")
+            .addEventListener(
+                "click",
+                function() {
+
+                    const confirmClear =
+                        confirm(
+                            "Are you sure you want to delete all results?"
+                        );
+
+
+                    if (confirmClear) {
+
+                        localStorage.removeItem(
+                            "quizResults"
+                        );
+
+                        loadResults();
+
+                    }
+
+                }
+            );
+
+
+        loadResults();
+
+    </script>
+
+</body>
+
+</html>
